@@ -13,4 +13,7 @@ public class BookingDto {
 
     @NotBlank
     private UUID propertyId;
+
+    @NotBlank
+    private UUID userId;
 }

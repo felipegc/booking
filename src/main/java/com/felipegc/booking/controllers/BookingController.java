@@ -3,8 +3,10 @@ package com.felipegc.booking.controllers;
 import com.felipegc.booking.dtos.BookingDto;
 import com.felipegc.booking.models.BookingModel;
 import com.felipegc.booking.models.PropertyModel;
+import com.felipegc.booking.models.UserModel;
 import com.felipegc.booking.services.BookingService;
 import com.felipegc.booking.services.PropertyService;
+import com.felipegc.booking.services.UserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,6 +33,9 @@ public class BookingController {
     @Autowired
     PropertyService propertyService;
 
+    @Autowired
+    UserService userService;
+
     @PostMapping
     public ResponseEntity<Object> saveBooking(@RequestBody BookingDto bookingDto) {
         Optional<PropertyModel> propertyModel = propertyService.findById(bookingDto.getPropertyId());
@@ -38,9 +43,15 @@ public class BookingController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Property Not Found.");
         }
 
+        Optional<UserModel> userModel = userService.findById(bookingDto.getUserId());
+        if(userModel.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User Not Found.");
+        }
+
         BookingModel bookingModel = new BookingModel();
         BeanUtils.copyProperties(bookingDto, bookingModel);
         bookingModel.setProperty(propertyModel.get());
+        bookingModel.setUser(userModel.get());
         return ResponseEntity.status(HttpStatus.CREATED).body(bookingService.save(bookingModel));
     }
 

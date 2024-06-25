@@ -28,4 +28,8 @@ public class BookingModel implements Serializable {
     @ManyToOne
     @JoinColumn(name = "property_id", referencedColumnName = "propertyId")
     private PropertyModel property;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "userId")
+    private UserModel user;
 }
