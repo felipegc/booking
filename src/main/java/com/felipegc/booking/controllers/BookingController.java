@@ -1,9 +1,10 @@
 package com.felipegc.booking.controllers;
 
 import com.felipegc.booking.dtos.BookingDto;
-import com.felipegc.booking.exceptions.GeneralException;
 import com.felipegc.booking.models.BookingModel;
+import com.felipegc.booking.models.PropertyModel;
 import com.felipegc.booking.services.BookingService;
+import com.felipegc.booking.services.PropertyService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -26,20 +28,29 @@ public class BookingController {
     @Autowired
     BookingService bookingService;
 
-    // TODO(felipegc): may we add a validation here?
+    @Autowired
+    PropertyService propertyService;
+
     @PostMapping
     public ResponseEntity<Object> saveBooking(@RequestBody BookingDto bookingDto) {
+        Optional<PropertyModel> propertyModel = propertyService.findById(bookingDto.getPropertyId());
+        if(propertyModel.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Property Not Found.");
+        }
+
         BookingModel bookingModel = new BookingModel();
         BeanUtils.copyProperties(bookingDto, bookingModel);
+        bookingModel.setProperty(propertyModel.get());
         return ResponseEntity.status(HttpStatus.CREATED).body(bookingService.save(bookingModel));
     }
 
     @GetMapping("/{bookingId}")
     public ResponseEntity<Object> getBooking(@PathVariable(value = "bookingId") UUID bookingId) {
-        try {
-            return ResponseEntity.status(HttpStatus.OK).body(bookingService.getBookingById(bookingId));
-        } catch (GeneralException e) {
-            return ResponseEntity.status(e.getStatus()).body(e.getDetail());
+        Optional<BookingModel> bookingModel = bookingService.findById(bookingId);
+        if(bookingModel.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Booking not found.");
         }
+
+        return ResponseEntity.status(HttpStatus.OK).body(bookingService.findById(bookingId));
     }
 }

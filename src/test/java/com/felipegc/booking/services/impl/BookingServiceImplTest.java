@@ -24,12 +24,13 @@ class BookingServiceImplTest {
     @InjectMocks
     private BookingServiceImpl bookingService;
 
-    @Test
-    void When_GetBookingById_WithNonExistingId_ShouldThrowNotFoundException() {
-        when(bookingRepository.findById(any())).thenReturn(Optional.empty());
-
-        GeneralException generalException =
-                assertThrows(GeneralException.class, () -> bookingService.getBookingById(any()));
-        assertEquals(HttpStatus.NOT_FOUND, generalException.getStatus());
-    }
+// TODO(felipegc): remove it
+//    @Test
+//    void When_GetBookingById_WithNonExistingId_ShouldThrowNotFoundException() {
+//        when(bookingRepository.findById(any())).thenReturn(Optional.empty());
+//
+//        GeneralException generalException =
+//                assertThrows(GeneralException.class, () -> bookingService.getBookingById(any()));
+//        assertEquals(HttpStatus.NOT_FOUND, generalException.getStatus());
+//    }
 }
