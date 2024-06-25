@@ -24,7 +24,10 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingModel getBookingById(UUID bookingId) {
-        return bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new GeneralException(HttpStatus.NOT_FOUND, "Booking not found"));
+        Optional<BookingModel> byId = bookingRepository.findById(bookingId);
+        if (byId.isEmpty()) {
+            throw new GeneralException(HttpStatus.NOT_FOUND, "Booking not found");
+        }
+        return byId.get();
     }
 }
