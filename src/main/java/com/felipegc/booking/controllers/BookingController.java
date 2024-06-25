@@ -1,6 +1,7 @@
 package com.felipegc.booking.controllers;
 
 import com.felipegc.booking.dtos.BookingDto;
+import com.felipegc.booking.exceptions.GeneralException;
 import com.felipegc.booking.models.BookingModel;
 import com.felipegc.booking.services.BookingService;
 import org.springframework.beans.BeanUtils;
@@ -34,7 +35,11 @@ public class BookingController {
     }
 
     @GetMapping("/{bookingId}")
-    public ResponseEntity<Object> getBooking(@PathVariable(value="bookingId") UUID bookingId) {
-        return ResponseEntity.status(HttpStatus.OK).body(bookingService.getBookingById(bookingId));
+    public ResponseEntity<Object> getBooking(@PathVariable(value = "bookingId") UUID bookingId) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(bookingService.getBookingById(bookingId));
+        } catch (GeneralException e) {
+            return ResponseEntity.status(e.getStatus()).body(e.getDetail());
+        }
     }
 }
