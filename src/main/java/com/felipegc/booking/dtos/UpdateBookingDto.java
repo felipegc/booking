@@ -6,19 +6,11 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Data
-public class BookingDto {
-
+public class UpdateBookingDto {
     @NotBlank
     private String guestDetails;
-
-    @NotNull
-    private UUID propertyId;
-
-    @NotNull
-    private UUID userId;
 
     @NotNull
     @Future

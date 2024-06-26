@@ -27,7 +27,7 @@ public class BookingModel implements Serializable {
     private UUID bookingId;
 
     @Column(nullable = false, length = 250)
-    private String description;
+    private String guestDetails;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

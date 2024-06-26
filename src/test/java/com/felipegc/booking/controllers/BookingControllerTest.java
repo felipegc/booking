@@ -66,7 +66,7 @@ class BookingControllerTest {
         when(userService.findById(userIdUUID)).thenReturn(Optional.of(userModel));
 
         BookingDto bookingDto = new BookingDto();
-        bookingDto.setDescription("Booking description");
+        bookingDto.setGuestDetails("Guest details");
         bookingDto.setPropertyId(propertyUUID);
         bookingDto.setUserId(userIdUUID);
         bookingDto.setStartDate(LocalDate.parse("2099-01-01"));

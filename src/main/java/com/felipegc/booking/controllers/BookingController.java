@@ -1,6 +1,7 @@
 package com.felipegc.booking.controllers;
 
 import com.felipegc.booking.dtos.BookingDto;
+import com.felipegc.booking.dtos.UpdateBookingDto;
 import com.felipegc.booking.models.BookingModel;
 import com.felipegc.booking.models.PropertyModel;
 import com.felipegc.booking.models.UserModel;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -71,5 +73,25 @@ public class BookingController {
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(bookingService.findById(bookingId));
+    }
+
+    @PutMapping("/{bookingId}")
+    public ResponseEntity<Object> updateBooking(@PathVariable(value = "bookingId") UUID bookingId,
+                                               @RequestBody @Valid UpdateBookingDto updateBookingDto) {
+        Optional<BookingModel> bookingModelOptional = bookingService.findById(bookingId);
+        if(bookingModelOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Booking Not Found.");
+        }
+
+        BookingModel bookingModel = bookingModelOptional.get();
+        bookingModel.setStartDate(updateBookingDto.getStartDate());
+        bookingModel.setEndDate(updateBookingDto.getEndDate());
+        bookingModel.setGuestDetails(updateBookingDto.getGuestDetails());
+
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(bookingService.save(bookingModel));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 }

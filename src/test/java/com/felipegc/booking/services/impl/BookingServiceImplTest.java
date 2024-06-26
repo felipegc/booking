@@ -16,6 +16,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,9 +40,11 @@ class BookingServiceImplTest {
     @Test
     void When_Save_WithDateRangeOverlap_ShouldThrowIllegalArgumentException() {
         BookingModel bookingModel = new BookingModel();
+        bookingModel.setBookingId(UUID.randomUUID());
         bookingModel.setStartDate(LocalDate.parse("2024-01-01"));
         bookingModel.setEndDate(LocalDate.parse("2024-01-10"));
         BookingModel bookingModel2 = new BookingModel();
+        bookingModel2.setBookingId(UUID.randomUUID());
         bookingModel2.setStartDate(LocalDate.parse("2024-01-11"));
         bookingModel2.setEndDate(LocalDate.parse("2024-01-15"));
 
@@ -60,5 +63,38 @@ class BookingServiceImplTest {
         IllegalArgumentException ex =
                 assertThrows(IllegalArgumentException.class, () -> bookingService.save(toSave));
         assertEquals("Date range overlap with another booking.", ex.getMessage());
+    }
+
+    @Test
+    void When_Save_WithDateRangeAndGuestDetailsUpdate_ShouldSucceed() {
+        UUID bookingModelId = UUID.randomUUID();
+
+        BookingModel bookingModel = new BookingModel();
+        bookingModel.setBookingId(bookingModelId);
+        bookingModel.setGuestDetails("Guest Details");
+        bookingModel.setStartDate(LocalDate.parse("2024-01-01"));
+        bookingModel.setEndDate(LocalDate.parse("2024-01-10"));
+        BookingModel bookingModel2 = new BookingModel();
+        bookingModel2.setBookingId(UUID.randomUUID());
+        bookingModel2.setStartDate(LocalDate.parse("2024-01-11"));
+        bookingModel2.setEndDate(LocalDate.parse("2024-01-15"));
+
+        UUID propertyUUID = UUID.randomUUID();
+        PropertyModel propertyModel = new PropertyModel();
+        propertyModel.setPropertyId(propertyUUID);
+
+        when(bookingRepository.findAllBookingsByPropertyIdAndStatus(propertyUUID, BookingStatus.RESERVED.name()))
+                .thenReturn(List.of(bookingModel, bookingModel2));
+
+        BookingModel toSave = new BookingModel();
+        toSave.setBookingId(bookingModelId);
+        toSave.setGuestDetails("Update Guest Details");
+        toSave.setProperty(propertyModel);
+        toSave.setStartDate(LocalDate.parse("2024-02-07"));
+        toSave.setEndDate(LocalDate.parse("2024-02-11"));
+
+        bookingService.save(toSave);
+
+        verify(bookingRepository).save(toSave);
     }
 }

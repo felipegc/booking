@@ -20,22 +20,31 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingModel save(BookingModel bookingModel) {
-        if(DateUtils.isStartDateBiggerThanEndDate(bookingModel.getStartDate(), bookingModel.getEndDate())) {
+        validateDates(bookingModel);
+        validateRangeDateOverlaps(bookingModel);
+
+        return bookingRepository.save(bookingModel);
+    }
+
+    private static void validateDates(BookingModel bookingModel) {
+        if (DateUtils.isStartDateBiggerThanEndDate(bookingModel.getStartDate(), bookingModel.getEndDate())) {
             throw new IllegalArgumentException("Start date must be before end date.");
         }
+    }
 
+    private void validateRangeDateOverlaps(BookingModel bookingModel) {
         List<BookingModel> bookings = bookingRepository.findAllBookingsByPropertyIdAndStatus(
                 bookingModel.getProperty().getPropertyId(), BookingStatus.RESERVED.name());
         Optional<BookingModel> first = bookings.stream().filter(
-                booking -> DateUtils.isDateRageOverlap(
-                        bookingModel.getStartDate(), bookingModel.getEndDate(),
-                        booking.getStartDate(), booking.getEndDate())).findFirst();
+                booking ->
+                        !booking.getBookingId().equals(bookingModel.getBookingId()) &&
+                                DateUtils.isDateRageOverlap(
+                                        bookingModel.getStartDate(), bookingModel.getEndDate(),
+                                        booking.getStartDate(), booking.getEndDate())).findFirst();
 
-        if(first.isPresent()) {
+        if (first.isPresent()) {
             throw new IllegalArgumentException("Date range overlap with another booking.");
         }
-
-        return bookingRepository.save(bookingModel);
     }
 
     @Override
