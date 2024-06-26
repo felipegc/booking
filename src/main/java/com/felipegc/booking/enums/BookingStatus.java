@@ -1,4 +1,4 @@
-package com.felipegc.booking.models.enums;
+package com.felipegc.booking.enums;
 
 public enum BookingStatus {
     RESERVED,

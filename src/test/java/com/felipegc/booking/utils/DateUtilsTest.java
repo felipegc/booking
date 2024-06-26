@@ -27,4 +27,16 @@ class DateUtilsTest {
                 LocalDate.parse("2024-01-01"), LocalDate.parse("2024-01-10"),
                 LocalDate.parse("2024-01-11"), LocalDate.parse("2024-01-15")));
     }
+
+    @Test
+    void When_CalculateWeeksDifference_IsMoreThanZero() {
+        assertEquals(2, DateUtils.calculateWeeksDifference(
+                LocalDate.parse("2024-01-01"), LocalDate.parse("2024-01-15")));
+    }
+
+    @Test
+    void When_CalculateWeeksDifference_IsLessThanOne() {
+        assertEquals(0, DateUtils.calculateWeeksDifference(
+                LocalDate.parse("2024-01-01"), LocalDate.parse("2024-01-06")));
+    }
 }

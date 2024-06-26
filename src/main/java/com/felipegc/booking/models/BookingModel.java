@@ -1,6 +1,6 @@
 package com.felipegc.booking.models;
 
-import com.felipegc.booking.models.enums.BookingStatus;
+import com.felipegc.booking.enums.BookingStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
