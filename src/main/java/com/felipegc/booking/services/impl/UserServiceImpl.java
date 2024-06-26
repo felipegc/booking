@@ -24,4 +24,9 @@ public class UserServiceImpl implements UserService {
     public Optional<UserModel> findById(UUID userId) {
         return userRepository.findById(userId);
     }
+
+    @Override
+    public boolean isUserAuthorized(String userId, String token) {
+        return true;
+    }
 }

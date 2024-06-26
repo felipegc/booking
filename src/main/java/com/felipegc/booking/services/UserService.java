@@ -10,4 +10,6 @@ public interface UserService {
     UserModel save(UserModel userModel);
 
     Optional<UserModel> findById(UUID userId);
+
+    boolean isUserAuthorized(String userId, String token);
 }
