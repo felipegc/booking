@@ -12,12 +12,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "TB_BOOKING")
 public class BookingModel implements Serializable {

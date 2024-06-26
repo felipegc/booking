@@ -30,7 +30,7 @@ public class PropertyModel implements Serializable {
     @Column(nullable = false, length = 250)
     private String description;
 
-    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "property", fetch = FetchType.EAGER)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<BookingModel> bookings;
 

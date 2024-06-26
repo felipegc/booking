@@ -37,6 +37,18 @@ public class BookingServiceImpl implements BookingService {
         bookingRepository.save(bookingModel);
     }
 
+    @Override
+    public void delete(BookingModel bookingModel) {
+        validateDeletionTime(bookingModel);
+
+        bookingRepository.delete(bookingModel);
+    }
+
+    @Override
+    public Optional<BookingModel> findById(UUID bookingId) {
+        return bookingRepository.findById(bookingId);
+    }
+
     private static void validateDates(BookingModel bookingModel) {
         if (DateUtils.isStartDateBiggerThanEndDate(bookingModel.getStartDate(), bookingModel.getEndDate())) {
             throw new IllegalArgumentException("Start date must be before end date.");
@@ -68,9 +80,12 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    @Override
-    public Optional<BookingModel> findById(UUID bookingId) {
-        return bookingRepository.findById(bookingId);
-    }
+    private static void validateDeletionTime(BookingModel bookingModel) {
+        LocalDate now = DateUtils.getTimeNow();
+        if (DateUtils.calculateWeeksDifference(now, bookingModel.getStartDate()) < 1) {
 
+            throw new IllegalArgumentException(
+                    "Deletion is only acceptable with at least one week in advance.");
+        }
+    }
 }

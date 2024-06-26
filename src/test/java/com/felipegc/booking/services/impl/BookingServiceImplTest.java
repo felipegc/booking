@@ -205,4 +205,32 @@ class BookingServiceImplTest {
         assertEquals("Date range overlap with another booking.", ex.getMessage());
     }
 
+    @Test
+    void When_Delete_WithDeletionTimeLessThanOneWeek_ShouldThrowIllegalArgumentException() {
+        try (MockedStatic<DateUtils> utilities = mockStatic(DateUtils.class)) {
+            utilities.when(DateUtils::getTimeNow).thenReturn(LocalDate.parse("2023-12-30"));
+
+            BookingModel bookingModel = new BookingModel();
+            bookingModel.setStartDate(LocalDate.parse("2024-01-01"));
+            bookingModel.setEndDate(LocalDate.parse("2024-01-10"));
+            bookingModel.setStatus(BookingStatus.RESERVED);
+
+            IllegalArgumentException ex =
+                    assertThrows(IllegalArgumentException.class, () -> bookingService.delete(bookingModel));
+            assertEquals("Deletion is only acceptable with at least one week in advance.",
+                    ex.getMessage());
+        }
+    }
+
+    @Test
+    void When_Delete_WithDeletionTimeGreaterThanOneWeek_ShouldSucceed() {
+        BookingModel bookingModel = new BookingModel();
+        bookingModel.setStartDate(LocalDate.parse("2099-01-01"));
+        bookingModel.setEndDate(LocalDate.parse("2099-01-10"));
+        bookingModel.setStatus(BookingStatus.RESERVED);
+
+        bookingService.delete(bookingModel);
+
+        verify(bookingRepository).delete(bookingModel);
+    }
 }

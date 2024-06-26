@@ -13,4 +13,6 @@ public interface BookingService {
     Optional<BookingModel> findById(UUID bookingId);
 
     void changeStatus(BookingModel bookingModel, BookingStatus status);
+
+    void delete(BookingModel bookingModel);
 }
