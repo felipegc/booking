@@ -47,7 +47,7 @@ public class BookingController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Property Not Found.");
         }
 
-        Optional<UserModel> userModel = userService.findById(bookingDto.getUserId());
+        Optional<UserModel> userModel = userService.findById(bookingDto.getGuestId());
         if(userModel.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User Not Found.");
         }
@@ -55,7 +55,7 @@ public class BookingController {
         BookingModel bookingModel = new BookingModel();
         BeanUtils.copyProperties(bookingDto, bookingModel);
         bookingModel.setProperty(propertyModel.get());
-        bookingModel.setUser(userModel.get());
+        bookingModel.setGuest(userModel.get());
         bookingModel.setStatus(BookingStatus.RESERVED);
 
         try {

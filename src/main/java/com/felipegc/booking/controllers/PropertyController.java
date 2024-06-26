@@ -33,7 +33,7 @@ public class PropertyController {
     public ResponseEntity<Object> saveProperty(@RequestBody PropertyDto propertyDto) {
         Optional<UserModel> userModel = userService.findById(propertyDto.getOwnerId());
         if(userModel.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Property Not Found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User Not Found.");
         }
 
         PropertyModel propertyModel = new PropertyModel();

@@ -18,7 +18,7 @@ public class BookingDto {
     private UUID propertyId;
 
     @NotNull
-    private UUID userId;
+    private UUID guestId;
 
     @NotNull
     @Future

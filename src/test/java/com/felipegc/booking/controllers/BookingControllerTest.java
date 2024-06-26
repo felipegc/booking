@@ -68,7 +68,7 @@ class BookingControllerTest {
         BookingDto bookingDto = new BookingDto();
         bookingDto.setGuestDetails("Guest details");
         bookingDto.setPropertyId(propertyUUID);
-        bookingDto.setUserId(userIdUUID);
+        bookingDto.setGuestId(userIdUUID);
         bookingDto.setStartDate(LocalDate.parse("2099-01-01"));
         bookingDto.setEndDate(LocalDate.parse("2099-01-10"));
         ObjectMapper objectMapper = new ObjectMapper();
