@@ -1,6 +1,7 @@
 package com.felipegc.booking.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.felipegc.booking.dtos.BookingDto;
 import com.felipegc.booking.models.PropertyModel;
 import com.felipegc.booking.models.UserModel;
@@ -13,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -67,7 +69,10 @@ class BookingControllerTest {
         bookingDto.setDescription("Booking description");
         bookingDto.setPropertyId(propertyUUID);
         bookingDto.setUserId(userIdUUID);
+        bookingDto.setStartDate(LocalDate.parse("2099-01-01"));
+        bookingDto.setEndDate(LocalDate.parse("2099-01-10"));
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
 
         this.mockMvc.perform(post("/bookings")
                 .contentType("application/json")

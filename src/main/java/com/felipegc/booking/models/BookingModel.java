@@ -1,7 +1,10 @@
 package com.felipegc.booking.models;
 
+import com.felipegc.booking.models.enums.BookingStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -11,6 +14,7 @@ import jakarta.persistence.Table;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
@@ -24,6 +28,16 @@ public class BookingModel implements Serializable {
 
     @Column(nullable = false, length = 250)
     private String description;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private BookingStatus status;
+
+    @Column(nullable = false, columnDefinition = "DATE")
+    private LocalDate startDate;
+
+    @Column(nullable = false, columnDefinition = "DATE")
+    private LocalDate endDate;
 
     @ManyToOne
     @JoinColumn(name = "property_id", referencedColumnName = "propertyId")

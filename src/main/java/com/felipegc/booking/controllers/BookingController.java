@@ -4,9 +4,11 @@ import com.felipegc.booking.dtos.BookingDto;
 import com.felipegc.booking.models.BookingModel;
 import com.felipegc.booking.models.PropertyModel;
 import com.felipegc.booking.models.UserModel;
+import com.felipegc.booking.models.enums.BookingStatus;
 import com.felipegc.booking.services.BookingService;
 import com.felipegc.booking.services.PropertyService;
 import com.felipegc.booking.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -37,7 +39,7 @@ public class BookingController {
     UserService userService;
 
     @PostMapping
-    public ResponseEntity<Object> saveBooking(@RequestBody BookingDto bookingDto) {
+    public ResponseEntity<Object> saveBooking(@RequestBody @Valid BookingDto bookingDto) {
         Optional<PropertyModel> propertyModel = propertyService.findById(bookingDto.getPropertyId());
         if(propertyModel.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Property Not Found.");
@@ -52,7 +54,13 @@ public class BookingController {
         BeanUtils.copyProperties(bookingDto, bookingModel);
         bookingModel.setProperty(propertyModel.get());
         bookingModel.setUser(userModel.get());
-        return ResponseEntity.status(HttpStatus.CREATED).body(bookingService.save(bookingModel));
+        bookingModel.setStatus(BookingStatus.RESERVED);
+
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(bookingService.save(bookingModel));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @GetMapping("/{bookingId}")
