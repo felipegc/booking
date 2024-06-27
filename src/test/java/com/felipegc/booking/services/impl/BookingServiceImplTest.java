@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BookingServiceImplTest {
@@ -42,22 +41,25 @@ class BookingServiceImplTest {
 
     @Test
     void When_Save_WithDateRangeOverlap_ShouldThrowIllegalArgumentException() {
+        UUID propertyUUID = UUID.randomUUID();
+        PropertyModel propertyModel = new PropertyModel();
+        propertyModel.setPropertyId(propertyUUID);
+
         BookingModel bookingModel = new BookingModel();
         bookingModel.setBookingId(UUID.randomUUID());
         bookingModel.setStartDate(LocalDate.parse("2024-01-01"));
         bookingModel.setEndDate(LocalDate.parse("2024-01-10"));
+        bookingModel.setStatus(BookingStatus.RESERVED);
+        bookingModel.setProperty(propertyModel);
 
         BookingModel bookingModel2 = new BookingModel();
         bookingModel2.setBookingId(UUID.randomUUID());
         bookingModel2.setStartDate(LocalDate.parse("2024-01-11"));
         bookingModel2.setEndDate(LocalDate.parse("2024-01-15"));
+        bookingModel2.setStatus(BookingStatus.RESERVED);
+        bookingModel2.setProperty(propertyModel);
 
-        UUID propertyUUID = UUID.randomUUID();
-        PropertyModel propertyModel = new PropertyModel();
-        propertyModel.setPropertyId(propertyUUID);
-
-        when(bookingRepository.findAllBookingsByPropertyIdAndStatus(propertyUUID, BookingStatus.RESERVED.name()))
-                .thenReturn(List.of(bookingModel, bookingModel2));
+        propertyModel.setBookings(List.of(bookingModel, bookingModel2));
 
         BookingModel toSave = new BookingModel();
         toSave.setProperty(propertyModel);
@@ -73,24 +75,27 @@ class BookingServiceImplTest {
     void When_Save_WithDateRangeAndGuestDetailsUpdate_ShouldSucceed() {
         UUID bookingModelId = UUID.randomUUID();
 
+        UUID propertyUUID = UUID.randomUUID();
+        PropertyModel propertyModel = new PropertyModel();
+        propertyModel.setPropertyId(propertyUUID);
+
         BookingModel bookingModel = new BookingModel();
         bookingModel.setBookingId(bookingModelId);
         bookingModel.setGuestDetails("Guest Details");
         bookingModel.setStartDate(LocalDate.parse("2024-01-01"));
         bookingModel.setEndDate(LocalDate.parse("2024-01-10"));
+        bookingModel.setStatus(BookingStatus.RESERVED);
+        bookingModel.setProperty(propertyModel);
 
         BookingModel bookingModel2 = new BookingModel();
         bookingModel2.setBookingId(UUID.randomUUID());
         bookingModel2.setGuestDetails("Guest Details2");
         bookingModel2.setStartDate(LocalDate.parse("2024-01-11"));
         bookingModel2.setEndDate(LocalDate.parse("2024-01-15"));
+        bookingModel2.setStatus(BookingStatus.RESERVED);
+        bookingModel2.setProperty(propertyModel);
 
-        UUID propertyUUID = UUID.randomUUID();
-        PropertyModel propertyModel = new PropertyModel();
-        propertyModel.setPropertyId(propertyUUID);
-
-        when(bookingRepository.findAllBookingsByPropertyIdAndStatus(propertyUUID, BookingStatus.RESERVED.name()))
-                .thenReturn(List.of(bookingModel, bookingModel2));
+        propertyModel.setBookings(List.of(bookingModel, bookingModel2));
 
         BookingModel toSave = new BookingModel();
         toSave.setBookingId(bookingModelId);
@@ -154,10 +159,10 @@ class BookingServiceImplTest {
         bookingModel2.setGuestDetails("Guest Details");
         bookingModel2.setStartDate(LocalDate.parse("2099-01-11"));
         bookingModel2.setEndDate(LocalDate.parse("2099-01-15"));
+        bookingModel2.setStatus(BookingStatus.RESERVED);
         bookingModel2.setProperty(propertyModel);
 
-        when(bookingRepository.findAllBookingsByPropertyIdAndStatus(propertyUUID, BookingStatus.RESERVED.name()))
-                .thenReturn(List.of(bookingModel2)); // CANCELED status wont return
+        propertyModel.setBookings(List.of(bookingModel, bookingModel2));
 
         bookingService.changeStatus(bookingModel, BookingStatus.RESERVED);
 
@@ -196,8 +201,7 @@ class BookingServiceImplTest {
         bookingModel3.setStatus(BookingStatus.RESERVED);
         bookingModel3.setProperty(propertyModel);
 
-        when(bookingRepository.findAllBookingsByPropertyIdAndStatus(propertyUUID, BookingStatus.RESERVED.name()))
-                .thenReturn(List.of(bookingModel2, bookingModel3));
+        propertyModel.setBookings(List.of(bookingModel, bookingModel2, bookingModel3));
 
         IllegalArgumentException ex =
                 assertThrows(IllegalArgumentException.class, () ->

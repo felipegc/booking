@@ -56,15 +56,15 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private void validateDateRangeOverlaps(BookingModel bookingModel) {
-        // TODO(felipegc): maybe it is easier if we get the bookings from property instead of all bookings
-        List<BookingModel> bookings = bookingRepository.findAllBookingsByPropertyIdAndStatus(
-                bookingModel.getProperty().getPropertyId(), BookingStatus.RESERVED.name());
-        Optional<BookingModel> first = bookings.stream().filter(
+        List<BookingModel> bookings = bookingModel.getProperty().getBookings().stream().filter(
                 booking ->
                         !booking.getBookingId().equals(bookingModel.getBookingId()) &&
-                                DateUtils.isDateRangeOverlap(
-                                        bookingModel.getStartDate(), bookingModel.getEndDate(),
-                                        booking.getStartDate(), booking.getEndDate())).findFirst();
+                                booking.getStatus().equals(BookingStatus.RESERVED)).toList();
+
+        Optional<BookingModel> first = bookings.stream().filter(
+                booking -> DateUtils.isDateRangeOverlap(
+                                bookingModel.getStartDate(), bookingModel.getEndDate(),
+                                booking.getStartDate(), booking.getEndDate())).findFirst();
 
         if (first.isPresent()) {
             throw new IllegalArgumentException("Date range overlap with another booking.");
