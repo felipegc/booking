@@ -27,10 +27,10 @@ public class LoginController {
     @PostMapping
     public ResponseEntity<Object> login(@RequestBody @Valid UserLoginDto userLoginDto) {
         try {
-            UUID login = userService.login(userLoginDto.getEmail(), userLoginDto.getPassword());
+            UUID token = userService.login(userLoginDto.getEmail(), userLoginDto.getPassword());
             UserLoginResponseDto userLoginResponseDto = new UserLoginResponseDto();
-            userLoginResponseDto.setToken(login);
-            return ResponseEntity.status(HttpStatus.OK).body(login);
+            userLoginResponseDto.setToken(token);
+            return ResponseEntity.status(HttpStatus.OK).body(userLoginResponseDto);
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
