@@ -2,6 +2,7 @@ package com.felipegc.booking.services;
 
 import com.felipegc.booking.models.UserModel;
 
+import javax.naming.AuthenticationException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -11,5 +12,8 @@ public interface UserService {
 
     Optional<UserModel> findById(UUID userId);
 
-    boolean isUserAuthorized(String userId, String token);
+    UUID login(String email, String password) throws AuthenticationException;
+
+    boolean isUserAuthorized(UUID token);
+
 }

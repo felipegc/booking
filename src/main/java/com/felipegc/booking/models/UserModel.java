@@ -1,5 +1,6 @@
 package com.felipegc.booking.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,4 +23,15 @@ public class UserModel implements Serializable {
 
     @Column(nullable = false, length = 30)
     private String name;
+
+    @Column(nullable = false, length = 30)
+    private String email;
+
+    @Column(nullable = false, length = 30)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String password;
+
+    @Column(length = 36)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private UUID token;
 }

@@ -14,6 +14,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Order(1)
 public class AuthorizationFilter implements Filter {
@@ -34,12 +35,14 @@ public class AuthorizationFilter implements Filter {
 
         HttpServletRequest req = (HttpServletRequest) request;
 
-        String userId = req.getHeader("UserId");
         String authorization = req.getHeader("Authorization");
 
-        LOG.info("Checking authorization for user {} with token :{}", userId, authorization);
-        if(!userService.isUserAuthorized(userId, authorization)) {
-            LOG.error("User {} is not authorized", userId);
+        LOG.info("Checking authorization for token :{}", authorization);
+
+        boolean isPostMethod = req.getMethod().equalsIgnoreCase("POST");
+
+        if(isPostMethod && !userService.isUserAuthorized(UUID.fromString(authorization))) {
+            LOG.error("Token {} is not authorized", authorization);
             HttpServletResponse httpServletResponse = (HttpServletResponse) response;
             httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
             httpServletResponse.sendError(HttpStatus.FORBIDDEN.value(), "User is not authorized");

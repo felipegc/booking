@@ -3,6 +3,7 @@ package com.felipegc.booking.controllers;
 import com.felipegc.booking.dtos.UserDto;
 import com.felipegc.booking.models.UserModel;
 import com.felipegc.booking.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,9 +23,13 @@ public class UserController {
     UserService userService;
 
     @PostMapping
-    public ResponseEntity<Object> saveUser(@RequestBody UserDto userDto) {
-        UserModel userModel = new UserModel();
-        BeanUtils.copyProperties(userDto, userModel);
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(userModel));
+    public ResponseEntity<Object> saveUser(@RequestBody @Valid UserDto userDto) {
+        try {
+            UserModel userModel = new UserModel();
+            BeanUtils.copyProperties(userDto, userModel);
+            return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(userModel));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }
     }
 }

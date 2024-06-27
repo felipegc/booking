@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class FilterConfiguration {
-    private UserService userService;
+    private final UserService userService;
 
     @Autowired
     public FilterConfiguration(UserService userService) {
@@ -22,7 +22,7 @@ public class FilterConfiguration {
 
         registrationBean.setFilter(new AuthorizationFilter(userService));
 
-        registrationBean.addUrlPatterns("/users/*");
+        registrationBean.addUrlPatterns("/properties/*");
         registrationBean.setOrder(1);
 
         return registrationBean;
