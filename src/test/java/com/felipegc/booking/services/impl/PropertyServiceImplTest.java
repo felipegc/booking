@@ -92,6 +92,7 @@ class PropertyServiceImplTest {
         propertyModel.setOwner(owner);
         propertyModel.setBookings(List.of(bookingModel));
         bookingModel.setProperty(propertyModel);
+        propertyModel.setBlocks(List.of());
 
         BlockModel blockModel = new BlockModel();
         blockModel.setStartDate(LocalDate.parse("2024-01-04"));
