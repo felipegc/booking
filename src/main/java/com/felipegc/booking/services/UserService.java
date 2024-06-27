@@ -16,4 +16,5 @@ public interface UserService {
 
     boolean isUserAuthorized(UUID token);
 
+    Optional<UserModel> findByToken(UUID token);
 }

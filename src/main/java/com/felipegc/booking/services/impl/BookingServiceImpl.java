@@ -22,7 +22,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingModel save(BookingModel bookingModel) {
         validateDates(bookingModel);
-        validateRangeDateOverlaps(bookingModel);
+        validateDateRangeOverlaps(bookingModel);
 
         return bookingRepository.save(bookingModel);
     }
@@ -31,7 +31,7 @@ public class BookingServiceImpl implements BookingService {
     public void changeStatus(BookingModel bookingModel, BookingStatus status) {
         validateCancellationTime(bookingModel, status);
         if (bookingModel.getStatus().equals(BookingStatus.CANCELED) && status.equals(BookingStatus.RESERVED))
-            validateRangeDateOverlaps(bookingModel);
+            validateDateRangeOverlaps(bookingModel);
 
         bookingModel.setStatus(status);
         bookingRepository.save(bookingModel);
@@ -55,13 +55,14 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private void validateRangeDateOverlaps(BookingModel bookingModel) {
+    private void validateDateRangeOverlaps(BookingModel bookingModel) {
+        // TODO(felipegc): maybe it is easier if we get the bookings from property instead of all bookings
         List<BookingModel> bookings = bookingRepository.findAllBookingsByPropertyIdAndStatus(
                 bookingModel.getProperty().getPropertyId(), BookingStatus.RESERVED.name());
         Optional<BookingModel> first = bookings.stream().filter(
                 booking ->
                         !booking.getBookingId().equals(bookingModel.getBookingId()) &&
-                                DateUtils.isDateRageOverlap(
+                                DateUtils.isDateRangeOverlap(
                                         bookingModel.getStartDate(), bookingModel.getEndDate(),
                                         booking.getStartDate(), booking.getEndDate())).findFirst();
 

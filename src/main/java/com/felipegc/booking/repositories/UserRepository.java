@@ -18,5 +18,5 @@ public interface UserRepository extends JpaRepository<UserModel, UUID>, JpaSpeci
     UserModel findUserByEmailAndPassword(@Param("email") String email, @Param("password") String password);
 
     @Query(value="select * from tb_user where token = :token", nativeQuery = true)
-    UserModel findUserByToken(@Param("token") UUID token);
+    Optional<UserModel> findUserByToken(@Param("token") UUID token);
 }

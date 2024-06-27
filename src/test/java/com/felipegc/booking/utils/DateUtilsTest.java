@@ -16,14 +16,14 @@ class DateUtilsTest {
 
     @Test
     void When_DateRangeOverlap_Then_ReturnTrue() {
-        assertTrue(DateUtils.isDateRageOverlap(
+        assertTrue(DateUtils.isDateRangeOverlap(
                 LocalDate.parse("2024-01-05"), LocalDate.parse("2024-01-10"),
                 LocalDate.parse("2024-01-02"), LocalDate.parse("2024-01-07")));
     }
 
     @Test
     void When_DateRangeNotOverlap_Then_ReturnFalse() {
-        assertFalse(DateUtils.isDateRageOverlap(
+        assertFalse(DateUtils.isDateRangeOverlap(
                 LocalDate.parse("2024-01-01"), LocalDate.parse("2024-01-10"),
                 LocalDate.parse("2024-01-11"), LocalDate.parse("2024-01-15")));
     }

@@ -12,7 +12,7 @@ public class DateUtils {
     }
 
     // reference: https://www.baeldung.com/java-check-two-date-ranges-overlap
-    public static boolean isDateRageOverlap(
+    public static boolean isDateRangeOverlap(
             LocalDate startDate1, LocalDate endDate1, LocalDate startDate2, LocalDate endDate2) {
         return !(endDate1.isBefore(startDate2) || startDate1.isAfter(endDate2));
     }

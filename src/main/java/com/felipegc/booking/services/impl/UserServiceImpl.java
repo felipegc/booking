@@ -45,7 +45,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean isUserAuthorized(UUID token) {
-        UserModel userByEmailAndToken = userRepository.findUserByToken(token);
-        return userByEmailAndToken != null;
+        Optional<UserModel> userByEmailAndToken = findByToken(token);
+        return userByEmailAndToken.isPresent();
+    }
+
+    @Override
+    public Optional<UserModel> findByToken(UUID token) {
+        return userRepository.findUserByToken(token);
     }
 }

@@ -11,7 +11,4 @@ public class PropertyDto {
 
     @NotBlank
     private String description;
-
-    @NotNull
-    private UUID ownerId;
 }

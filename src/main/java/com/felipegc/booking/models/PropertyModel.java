@@ -33,6 +33,10 @@ public class PropertyModel implements Serializable {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<BookingModel> bookings;
 
+    @OneToMany(mappedBy = "property", fetch = FetchType.EAGER)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private List<BlockModel> blocks;
+
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "userId")
     private UserModel owner;
