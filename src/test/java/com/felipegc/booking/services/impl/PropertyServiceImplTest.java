@@ -6,8 +6,6 @@ import com.felipegc.booking.models.BookingModel;
 import com.felipegc.booking.models.PropertyModel;
 import com.felipegc.booking.models.UserModel;
 import com.felipegc.booking.repositories.BlockRepository;
-import com.felipegc.booking.repositories.BookingRepository;
-import com.felipegc.booking.repositories.PropertyRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,7 +29,7 @@ class PropertyServiceImplTest {
     private PropertyServiceImpl propertyService;
 
     @Test
-    void When_AddBlock_WithUserDifferentFromOwner_ShouldThrowIllegalArgumentException() {
+    void When_SaveBlock_WithUserDifferentFromOwner_ShouldThrowIllegalArgumentException() {
         UserModel userModel = new UserModel();
         userModel.setUserId(UUID.randomUUID());
 
@@ -47,12 +45,12 @@ class PropertyServiceImplTest {
         blockModel.setProperty(propertyModel);
 
         IllegalArgumentException ex =
-                assertThrows(IllegalArgumentException.class, () -> propertyService.addBlock(blockModel, userModel));
-        assertEquals("Only the owner of a property can add a block.", ex.getMessage());
+                assertThrows(IllegalArgumentException.class, () -> propertyService.saveBlock(blockModel, userModel));
+        assertEquals("Only the owner of a property can add or delete a block.", ex.getMessage());
     }
 
     @Test
-    void When_AddBlock_WithBlockAndBookingOverlap_ShouldThrowIllegalArgumentException() {
+    void When_SaveBlock_WithBlockAndBookingOverlap_ShouldThrowIllegalArgumentException() {
         UserModel owner = new UserModel();
         owner.setUserId(UUID.randomUUID());
 
@@ -73,12 +71,12 @@ class PropertyServiceImplTest {
         blockModel.setProperty(propertyModel);
 
         IllegalArgumentException ex =
-                assertThrows(IllegalArgumentException.class, () -> propertyService.addBlock(blockModel, owner));
+                assertThrows(IllegalArgumentException.class, () -> propertyService.saveBlock(blockModel, owner));
         assertEquals("Date range overlap with a booking.", ex.getMessage());
     }
 
     @Test
-    void When_AddBlock_WithBlockAndCancelledBookingOverlap_ShouldSucceed() {
+    void When_SaveBlock_WithBlockAndCancelledBookingOverlap_ShouldSucceed() {
         UserModel owner = new UserModel();
         owner.setUserId(UUID.randomUUID());
 
@@ -99,13 +97,13 @@ class PropertyServiceImplTest {
         blockModel.setEndDate(LocalDate.parse("2024-01-15"));
         blockModel.setProperty(propertyModel);
 
-        propertyService.addBlock(blockModel, owner);
+        propertyService.saveBlock(blockModel, owner);
 
         verify(blockRepository).save(blockModel);
     }
 
     @Test
-    void When_AddBlock_WithBlockAndBlockOverlap_ShouldThrowIllegalArgumentException() {
+    void When_SaveBlock_WithBlockAndBlockOverlap_ShouldThrowIllegalArgumentException() {
         UserModel owner = new UserModel();
         owner.setUserId(UUID.randomUUID());
 
@@ -132,8 +130,132 @@ class PropertyServiceImplTest {
         blockModel.setProperty(propertyModel);
 
         IllegalArgumentException ex =
-                assertThrows(IllegalArgumentException.class, () -> propertyService.addBlock(blockModel, owner));
+                assertThrows(IllegalArgumentException.class, () -> propertyService.saveBlock(blockModel, owner));
         assertEquals("Date range overlap with another block.", ex.getMessage());
     }
 
+    @Test
+    void When_SaveBlock_WithBlockWithoutOverlapsWithBookingAndBlocks_ShouldSucceed() {
+        UUID blockModelId = UUID.randomUUID();
+
+        UserModel owner = new UserModel();
+        owner.setUserId(UUID.randomUUID());
+
+        BookingModel bookingModel = new BookingModel();
+        bookingModel.setBookingId(UUID.randomUUID());
+        bookingModel.setStartDate(LocalDate.parse("2024-01-01"));
+        bookingModel.setEndDate(LocalDate.parse("2024-01-10"));
+        bookingModel.setStatus(BookingStatus.RESERVED);
+
+        PropertyModel propertyModel = new PropertyModel();
+        propertyModel.setOwner(owner);
+        propertyModel.setBookings(List.of(bookingModel));
+        bookingModel.setProperty(propertyModel);
+
+        BlockModel blockModel = new BlockModel();
+        blockModel.setBlockId(blockModelId);
+        blockModel.setStartDate(LocalDate.parse("2024-01-04"));
+        blockModel.setEndDate(LocalDate.parse("2024-01-15"));
+        blockModel.setProperty(propertyModel);
+
+        BlockModel blockModel2 = new BlockModel();
+        blockModel2.setStartDate(LocalDate.parse("2024-02-04"));
+        blockModel2.setEndDate(LocalDate.parse("2024-02-15"));
+        blockModel2.setProperty(propertyModel);
+
+        propertyModel.setBlocks(List.of(blockModel, blockModel2));
+
+        BlockModel toSave = new BlockModel();
+        toSave.setBlockId(blockModelId);
+        toSave.setStartDate(LocalDate.parse("2024-03-27"));
+        toSave.setEndDate(LocalDate.parse("2024-03-29"));
+        toSave.setReason("updateReason");
+        toSave.setProperty(propertyModel);
+
+        propertyService.saveBlock(toSave, owner);
+
+        verify(blockRepository).save(toSave);
+    }
+
+    @Test
+    void When_SaveBlock_WithWithoutDateRangeUpdate_ShouldSucceed() {
+        UUID blockModelId = UUID.randomUUID();
+
+        UserModel owner = new UserModel();
+        owner.setUserId(UUID.randomUUID());
+
+        BookingModel bookingModel = new BookingModel();
+        bookingModel.setBookingId(UUID.randomUUID());
+        bookingModel.setStartDate(LocalDate.parse("2024-01-22"));
+        bookingModel.setEndDate(LocalDate.parse("2024-01-24"));
+        bookingModel.setStatus(BookingStatus.RESERVED);
+
+        PropertyModel propertyModel = new PropertyModel();
+        propertyModel.setOwner(owner);
+        propertyModel.setBookings(List.of(bookingModel));
+        bookingModel.setProperty(propertyModel);
+
+        BlockModel blockModel = new BlockModel();
+        blockModel.setBlockId(blockModelId);
+        blockModel.setStartDate(LocalDate.parse("2024-01-04"));
+        blockModel.setEndDate(LocalDate.parse("2024-01-15"));
+        blockModel.setProperty(propertyModel);
+
+        propertyModel.setBlocks(List.of(blockModel));
+
+        BlockModel toSave = new BlockModel();
+        toSave.setBlockId(blockModelId);
+        toSave.setStartDate(LocalDate.parse("2024-01-04"));
+        toSave.setEndDate(LocalDate.parse("2024-01-15"));
+        toSave.setReason("updateReason");
+        toSave.setProperty(propertyModel);
+
+        propertyService.saveBlock(toSave, owner);
+
+        verify(blockRepository).save(toSave);
+    }
+
+    @Test
+    void When_DeleteBlock_WithUserDifferentFromOwner_ShouldThrowIllegalArgumentException() {
+        UserModel userModel = new UserModel();
+        userModel.setUserId(UUID.randomUUID());
+
+        UserModel owner = new UserModel();
+        owner.setUserId(UUID.randomUUID());
+
+        PropertyModel propertyModel = new PropertyModel();
+        propertyModel.setOwner(owner);
+
+        BlockModel blockModel = new BlockModel();
+        blockModel.setStartDate(LocalDate.parse("2024-01-11"));
+        blockModel.setEndDate(LocalDate.parse("2024-01-15"));
+        blockModel.setProperty(propertyModel);
+
+        IllegalArgumentException ex =
+                assertThrows(IllegalArgumentException.class, () -> propertyService.deleteBlock(blockModel, userModel));
+        assertEquals("Only the owner of a property can add or delete a block.", ex.getMessage());
+    }
+
+    @Test
+    void When_DeleteBlock_WithBlock_ShouldSucceed() {
+        UserModel owner = new UserModel();
+        owner.setUserId(UUID.randomUUID());
+
+        PropertyModel propertyModel = new PropertyModel();
+        propertyModel.setPropertyId(UUID.randomUUID());
+        propertyModel.setOwner(owner);
+
+        BlockModel blockModel = new BlockModel();
+        blockModel.setBlockId(UUID.randomUUID());
+        blockModel.setStartDate(LocalDate.parse("2024-01-11"));
+        blockModel.setEndDate(LocalDate.parse("2024-01-15"));
+        blockModel.setProperty(propertyModel);
+
+        propertyModel.setBlocks(List.of(blockModel));
+
+        propertyService.deleteBlock(blockModel, owner);
+
+        verify(blockRepository).deleteBlockByPropertyIdAndBlockId(
+                blockModel.getProperty().getPropertyId(), blockModel.getBlockId());
+    }
 }

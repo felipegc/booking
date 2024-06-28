@@ -9,6 +9,7 @@ import com.felipegc.booking.repositories.BlockRepository;
 import com.felipegc.booking.repositories.PropertyRepository;
 import com.felipegc.booking.services.PropertyService;
 import com.felipegc.booking.utils.DateUtils;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +32,7 @@ public class PropertyServiceImpl implements PropertyService {
     }
 
     @Override
-    public BlockModel addBlock(BlockModel blockModel, UserModel userModel) {
+    public BlockModel saveBlock(BlockModel blockModel, UserModel userModel) {
         validateIfUserIsOwner(blockModel, userModel);
         validateDateRangeOverlapsWithBooking(blockModel);
         validateDateRangeOverlapsWithBlock(blockModel);
@@ -41,7 +42,7 @@ public class PropertyServiceImpl implements PropertyService {
 
     private static void validateIfUserIsOwner(BlockModel blockModel, UserModel userModel) {
         if(!blockModel.getProperty().getOwner().getUserId().equals(userModel.getUserId())) {
-            throw new IllegalArgumentException("Only the owner of a property can add a block.");
+            throw new IllegalArgumentException("Only the owner of a property can add or delete a block.");
         }
     }
 
@@ -60,7 +61,8 @@ public class PropertyServiceImpl implements PropertyService {
     }
 
     private static void validateDateRangeOverlapsWithBlock(BlockModel blockModel) {
-        List<BlockModel> blocks = blockModel.getProperty().getBlocks();
+        List<BlockModel> blocks = blockModel.getProperty().getBlocks().stream().filter(
+                block -> !block.getBlockId().equals(blockModel.getBlockId())).toList();
 
         Optional<BlockModel> first = blocks.stream().filter(
                 block -> DateUtils.isDateRangeOverlap(
@@ -75,6 +77,15 @@ public class PropertyServiceImpl implements PropertyService {
     @Override
     public Optional<PropertyModel> findById(UUID propertyId) {
         return propertyRepository.findById(propertyId);
+    }
+
+    @Transactional
+    @Override
+    public void deleteBlock(BlockModel blockModel, UserModel userModel) {
+        validateIfUserIsOwner(blockModel, userModel);
+
+        blockRepository.deleteBlockByPropertyIdAndBlockId(
+                blockModel.getProperty().getPropertyId(), blockModel.getBlockId());
     }
 
     @Override

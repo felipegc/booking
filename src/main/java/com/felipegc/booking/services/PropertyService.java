@@ -12,9 +12,11 @@ public interface PropertyService {
 
     PropertyModel save(PropertyModel propertyModel);
 
-    BlockModel addBlock(BlockModel blockModel, UserModel userModel);
+    BlockModel saveBlock(BlockModel blockModel, UserModel userModel);
 
     Optional<PropertyModel> findById(UUID propertyId);
+
+    void deleteBlock(BlockModel blockModel, UserModel userModel);
 
     List<PropertyModel> getAllProperties();
 }

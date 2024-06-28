@@ -24,6 +24,8 @@ public class FilterConfiguration {
 
         registrationBean.addUrlPatterns("/properties/*");
         registrationBean.setOrder(1);
+        // change if the filter should be disabled.
+        registrationBean.setEnabled(true);
 
         return registrationBean;
     }

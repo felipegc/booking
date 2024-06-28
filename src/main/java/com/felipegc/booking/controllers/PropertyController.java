@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,7 +41,7 @@ public class PropertyController {
     public ResponseEntity<Object> saveProperty(@RequestHeader("Authorization") String token,
                                                @RequestBody PropertyDto propertyDto) {
         Optional<UserModel> userModel = userService.findByToken(UUID.fromString(token));
-        if(userModel.isEmpty()) {
+        if (userModel.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User Not Found.");
         }
 
@@ -50,17 +51,17 @@ public class PropertyController {
         return ResponseEntity.status(HttpStatus.CREATED).body(propertyService.save(propertyModel));
     }
 
-    @PutMapping("/{propertyId}/blocks")
+    @PostMapping("/{propertyId}/blocks")
     public ResponseEntity<Object> addBlock(@RequestHeader("Authorization") String token,
                                            @RequestBody @Valid BlockDto blockDto,
-                                           @PathVariable(value="propertyId") UUID propertyId) {
+                                           @PathVariable(value = "propertyId") UUID propertyId) {
         Optional<UserModel> userModel = userService.findByToken(UUID.fromString(token));
-        if(userModel.isEmpty()) {
+        if (userModel.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User Not Found.");
         }
 
         Optional<PropertyModel> propertyModel = propertyService.findById(propertyId);
-        if(propertyModel.isEmpty()) {
+        if (propertyModel.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Property Not Found.");
         }
 
@@ -69,7 +70,69 @@ public class PropertyController {
         blockModel.setProperty(propertyModel.get());
 
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(propertyService.addBlock(blockModel, userModel.get()));
+            return ResponseEntity.status(HttpStatus.CREATED).body(propertyService.saveBlock(blockModel, userModel.get()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{propertyId}/blocks/{blockId}")
+    public ResponseEntity<Object> updateBlock(@RequestHeader("Authorization") String token,
+                                              @RequestBody @Valid BlockDto blockDto,
+                                              @PathVariable(value = "propertyId") UUID propertyId,
+                                              @PathVariable(value = "blockId") UUID blockId) {
+        Optional<UserModel> userModel = userService.findByToken(UUID.fromString(token));
+        if (userModel.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User Not Found.");
+        }
+
+        Optional<PropertyModel> propertyModel = propertyService.findById(propertyId);
+        if (propertyModel.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Property Not Found.");
+        }
+
+        Optional<BlockModel> blockModelOptional = propertyModel.get().getBlocks().stream()
+                .filter(block -> block.getBlockId().equals(blockId))
+                .findFirst();
+        if (blockModelOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Block Not Found.");
+        }
+
+        BlockModel blockModel = blockModelOptional.get();
+        BeanUtils.copyProperties(blockDto, blockModel);
+        blockModel.setProperty(propertyModel.get());
+
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(propertyService.saveBlock(blockModel, userModel.get()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{propertyId}/blocks/{blockId}")
+    public ResponseEntity<Object> deleteBlock(@RequestHeader("Authorization") String token,
+                                              @PathVariable(value = "propertyId") UUID propertyId,
+                                              @PathVariable(value = "blockId") UUID blockId) {
+        Optional<UserModel> userModel = userService.findByToken(UUID.fromString(token));
+        if (userModel.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User Not Found.");
+        }
+
+        Optional<PropertyModel> propertyModel = propertyService.findById(propertyId);
+        if (propertyModel.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Property Not Found.");
+        }
+
+        Optional<BlockModel> blockModelOptional = propertyModel.get().getBlocks().stream()
+                .filter(block -> block.getBlockId().equals(blockId))
+                .findFirst();
+        if (blockModelOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Block Not Found.");
+        }
+
+        try {
+            propertyService.deleteBlock(blockModelOptional.get(), userModel.get());
+            return ResponseEntity.status(HttpStatus.OK).build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
