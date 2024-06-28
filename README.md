@@ -18,6 +18,16 @@ To run the application, you can use the following command:
 mvn spring-boot:run
 ```
 
+## Accessing the database for the application
+
+The application uses an in-memory database called H2. You can access the database by visiting the following URL:
+
+```
+http://localhost:8080/h2-console
+```
+
+**Note:** The JDBC URL is `jdbc:h2:mem:bookingdb` and the username is `sa` and the password is `admin`.
+
 ## Technologies
 
 - Java 17
