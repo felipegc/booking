@@ -1,5 +1,6 @@
 package com.felipegc.booking.services.impl;
 
+import com.felipegc.booking.models.BlockModel;
 import com.felipegc.booking.models.BookingModel;
 import com.felipegc.booking.models.PropertyModel;
 import com.felipegc.booking.enums.BookingStatus;
@@ -40,7 +41,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void When_Save_WithDateRangeOverlap_ShouldThrowIllegalArgumentException() {
+    void When_Save_WithDateRangeOverlapWithAnotherBooking_ShouldThrowIllegalArgumentException() {
         UUID propertyUUID = UUID.randomUUID();
         PropertyModel propertyModel = new PropertyModel();
         propertyModel.setPropertyId(propertyUUID);
@@ -72,12 +73,52 @@ class BookingServiceImplTest {
     }
 
     @Test
+    void When_Save_WithDateRangeOverlapWithBlock_ShouldThrowIllegalArgumentException() {
+        BlockModel blockModel = new BlockModel();
+        blockModel.setBlockId(UUID.randomUUID());
+        blockModel.setStartDate(LocalDate.parse("2024-02-07"));
+        blockModel.setEndDate(LocalDate.parse("2024-02-15"));
+
+        UUID propertyUUID = UUID.randomUUID();
+        PropertyModel propertyModel = new PropertyModel();
+        propertyModel.setPropertyId(propertyUUID);
+        propertyModel.setBlocks(List.of(blockModel));
+        blockModel.setProperty(propertyModel);
+
+        BookingModel bookingModel = new BookingModel();
+        bookingModel.setBookingId(UUID.randomUUID());
+        bookingModel.setStartDate(LocalDate.parse("2024-01-01"));
+        bookingModel.setEndDate(LocalDate.parse("2024-01-10"));
+        bookingModel.setStatus(BookingStatus.RESERVED);
+        bookingModel.setProperty(propertyModel);
+
+        BookingModel bookingModel2 = new BookingModel();
+        bookingModel2.setBookingId(UUID.randomUUID());
+        bookingModel2.setStartDate(LocalDate.parse("2024-01-11"));
+        bookingModel2.setEndDate(LocalDate.parse("2024-01-15"));
+        bookingModel2.setStatus(BookingStatus.RESERVED);
+        bookingModel2.setProperty(propertyModel);
+
+        propertyModel.setBookings(List.of(bookingModel, bookingModel2));
+
+        BookingModel toSave = new BookingModel();
+        toSave.setProperty(propertyModel);
+        toSave.setStartDate(LocalDate.parse("2024-02-07"));
+        toSave.setEndDate(LocalDate.parse("2024-02-11"));
+
+        IllegalArgumentException ex =
+                assertThrows(IllegalArgumentException.class, () -> bookingService.save(toSave));
+        assertEquals("Date range overlap with a block.", ex.getMessage());
+    }
+
+    @Test
     void When_Save_WithDateRangeAndGuestDetailsUpdate_ShouldSucceed() {
         UUID bookingModelId = UUID.randomUUID();
 
         UUID propertyUUID = UUID.randomUUID();
         PropertyModel propertyModel = new PropertyModel();
         propertyModel.setPropertyId(propertyUUID);
+        propertyModel.setBlocks(List.of());
 
         BookingModel bookingModel = new BookingModel();
         bookingModel.setBookingId(bookingModelId);
@@ -144,6 +185,7 @@ class BookingServiceImplTest {
         UUID propertyUUID = UUID.randomUUID();
         PropertyModel propertyModel = new PropertyModel();
         propertyModel.setPropertyId(propertyUUID);
+        propertyModel.setBlocks(List.of());
 
         UUID bookingModelId = UUID.randomUUID();
         BookingModel bookingModel = new BookingModel();
@@ -170,7 +212,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void When_ChangeStatus_WithStatusReservedAndDateRangeOverlap_ShouldThrowIllegalArgumentException() {
+    void When_ChangeStatus_WithStatusReservedAndDateRangeOverlapsWithAnotherBooking_ShouldThrowIllegalArgumentException() {
         UUID propertyUUID = UUID.randomUUID();
         PropertyModel propertyModel = new PropertyModel();
         propertyModel.setPropertyId(propertyUUID);
@@ -207,6 +249,52 @@ class BookingServiceImplTest {
                 assertThrows(IllegalArgumentException.class, () ->
                         bookingService.changeStatus(bookingModel, BookingStatus.RESERVED));
         assertEquals("Date range overlap with another booking.", ex.getMessage());
+    }
+
+    @Test
+    void When_ChangeStatus_WithStatusReservedAndDateRangeOverlapsWithBlock_ShouldThrowIllegalArgumentException() {
+        BlockModel blockModel = new BlockModel();
+        blockModel.setBlockId(UUID.randomUUID());
+        blockModel.setStartDate(LocalDate.parse("2099-01-07"));
+        blockModel.setEndDate(LocalDate.parse("2099-01-15"));
+
+        UUID propertyUUID = UUID.randomUUID();
+        PropertyModel propertyModel = new PropertyModel();
+        propertyModel.setPropertyId(propertyUUID);
+        propertyModel.setBlocks(List.of(blockModel));
+
+        UUID bookingModelId = UUID.randomUUID();
+
+        BookingModel bookingModel = new BookingModel();
+        bookingModel.setBookingId(bookingModelId);
+        bookingModel.setGuestDetails("Guest Details");
+        bookingModel.setStartDate(LocalDate.parse("2099-01-01"));
+        bookingModel.setEndDate(LocalDate.parse("2099-01-10"));
+        bookingModel.setStatus(BookingStatus.CANCELED);
+        bookingModel.setProperty(propertyModel);
+
+        BookingModel bookingModel2 = new BookingModel();
+        bookingModel2.setBookingId(UUID.randomUUID());
+        bookingModel2.setGuestDetails("Guest Details2");
+        bookingModel2.setStartDate(LocalDate.parse("2099-01-11"));
+        bookingModel2.setEndDate(LocalDate.parse("2099-01-15"));
+        bookingModel2.setStatus(BookingStatus.RESERVED);
+        bookingModel2.setProperty(propertyModel);
+
+        BookingModel bookingModel3 = new BookingModel();
+        bookingModel3.setBookingId(UUID.randomUUID());
+        bookingModel3.setGuestDetails("Guest Details3");
+        bookingModel3.setStartDate(LocalDate.parse("2099-04-03"));
+        bookingModel3.setEndDate(LocalDate.parse("2099-04-08"));
+        bookingModel3.setStatus(BookingStatus.RESERVED);
+        bookingModel3.setProperty(propertyModel);
+
+        propertyModel.setBookings(List.of(bookingModel, bookingModel2, bookingModel3));
+
+        IllegalArgumentException ex =
+                assertThrows(IllegalArgumentException.class, () ->
+                        bookingService.changeStatus(bookingModel, BookingStatus.RESERVED));
+        assertEquals("Date range overlap with a block.", ex.getMessage());
     }
 
     @Test

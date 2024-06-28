@@ -119,6 +119,7 @@ class PropertyServiceImplTest {
         bookingModel.setProperty(propertyModel);
 
         BlockModel existingBlock = new BlockModel();
+        existingBlock.setBlockId(UUID.randomUUID());
         existingBlock.setStartDate(LocalDate.parse("2024-01-01"));
         existingBlock.setEndDate(LocalDate.parse("2024-01-15"));
         existingBlock.setProperty(propertyModel);
@@ -153,12 +154,14 @@ class PropertyServiceImplTest {
         bookingModel.setProperty(propertyModel);
 
         BlockModel blockModel = new BlockModel();
+        blockModel.setBlockId(UUID.randomUUID());
         blockModel.setBlockId(blockModelId);
         blockModel.setStartDate(LocalDate.parse("2024-01-04"));
         blockModel.setEndDate(LocalDate.parse("2024-01-15"));
         blockModel.setProperty(propertyModel);
 
         BlockModel blockModel2 = new BlockModel();
+        blockModel2.setBlockId(UUID.randomUUID());
         blockModel2.setStartDate(LocalDate.parse("2024-02-04"));
         blockModel2.setEndDate(LocalDate.parse("2024-02-15"));
         blockModel2.setProperty(propertyModel);

@@ -34,8 +34,8 @@ public class PropertyServiceImpl implements PropertyService {
     @Override
     public BlockModel saveBlock(BlockModel blockModel, UserModel userModel) {
         validateIfUserIsOwner(blockModel, userModel);
-        validateDateRangeOverlapsWithBooking(blockModel);
-        validateDateRangeOverlapsWithBlock(blockModel);
+        validateDateRangeOverlapsWithBookings(blockModel);
+        validateDateRangeOverlapsWithBlocks(blockModel);
 
         return blockRepository.save(blockModel);
     }
@@ -46,7 +46,7 @@ public class PropertyServiceImpl implements PropertyService {
         }
     }
 
-    private static void validateDateRangeOverlapsWithBooking(BlockModel blockModel) {
+    private static void validateDateRangeOverlapsWithBookings(BlockModel blockModel) {
         List<BookingModel> bookings = blockModel.getProperty().getBookings().stream().filter(
                 booking -> booking.getStatus().equals(BookingStatus.RESERVED)).toList();
 
@@ -60,7 +60,7 @@ public class PropertyServiceImpl implements PropertyService {
         }
     }
 
-    private static void validateDateRangeOverlapsWithBlock(BlockModel blockModel) {
+    private static void validateDateRangeOverlapsWithBlocks(BlockModel blockModel) {
         List<BlockModel> blocks = blockModel.getProperty().getBlocks().stream().filter(
                 block -> !block.getBlockId().equals(blockModel.getBlockId())).toList();
 

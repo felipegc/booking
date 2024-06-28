@@ -1,6 +1,7 @@
 package com.felipegc.booking.services.impl;
 
 import com.felipegc.booking.enums.BookingStatus;
+import com.felipegc.booking.models.BlockModel;
 import com.felipegc.booking.models.BookingModel;
 import com.felipegc.booking.repositories.BookingRepository;
 import com.felipegc.booking.services.BookingService;
@@ -22,7 +23,8 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingModel save(BookingModel bookingModel) {
         validateDates(bookingModel);
-        validateDateRangeOverlaps(bookingModel);
+        validateDateRangeOverlapsWithBookings(bookingModel);
+        validateDateRangeOverlapsWithBlocks(bookingModel);
 
         return bookingRepository.save(bookingModel);
     }
@@ -30,8 +32,10 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public void changeStatus(BookingModel bookingModel, BookingStatus status) {
         validateCancellationTime(bookingModel, status);
-        if (bookingModel.getStatus().equals(BookingStatus.CANCELED) && status.equals(BookingStatus.RESERVED))
-            validateDateRangeOverlaps(bookingModel);
+        if (bookingModel.getStatus().equals(BookingStatus.CANCELED) && status.equals(BookingStatus.RESERVED)) {
+            validateDateRangeOverlapsWithBookings(bookingModel);
+            validateDateRangeOverlapsWithBlocks(bookingModel);
+        }
 
         bookingModel.setStatus(status);
         bookingRepository.save(bookingModel);
@@ -55,7 +59,7 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private void validateDateRangeOverlaps(BookingModel bookingModel) {
+    private void validateDateRangeOverlapsWithBookings(BookingModel bookingModel) {
         List<BookingModel> bookings = bookingModel.getProperty().getBookings().stream().filter(
                 booking ->
                         !booking.getBookingId().equals(bookingModel.getBookingId()) &&
@@ -68,6 +72,19 @@ public class BookingServiceImpl implements BookingService {
 
         if (first.isPresent()) {
             throw new IllegalArgumentException("Date range overlap with another booking.");
+        }
+    }
+
+    private static void validateDateRangeOverlapsWithBlocks(BookingModel bookingModel) {
+        List<BlockModel> blocks = bookingModel.getProperty().getBlocks();
+
+        Optional<BlockModel> first = blocks.stream().filter(
+                block -> DateUtils.isDateRangeOverlap(
+                        bookingModel.getStartDate(), bookingModel.getEndDate(),
+                        block.getStartDate(), block.getEndDate())).findFirst();
+
+        if (first.isPresent()) {
+            throw new IllegalArgumentException("Date range overlap with a block.");
         }
     }
 
