@@ -35,7 +35,7 @@ public class AuthorizationFilter implements Filter {
 
         HttpServletRequest req = (HttpServletRequest) request;
 
-        String authorization = req.getHeader("Authorization");
+        String authorization = req.getHeader("token");
 
         LOG.info("Checking authorization for token :{}", authorization);
 

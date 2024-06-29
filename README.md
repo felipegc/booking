@@ -18,6 +18,14 @@ To run the application, you can use the following command:
 mvn spring-boot:run
 ```
 
+## Testing the api
+
+Theres is a swagger UI that can be accessed by visiting the following URL:
+
+```
+http://localhost:8080/swagger-ui/index.html
+```
+
 ## Accessing the database for the application
 
 The application uses an in-memory database called H2. You can access the database by visiting the following URL:
@@ -38,3 +46,4 @@ http://localhost:8080/h2-console
 - [Junit 5](https://junit.org/junit5): used for testing
 - [Mockito](https://site.mockito.org): used for mocking objects in testing
 - [Maven](https://maven.apache.org): used for building the project
+- [Swagger](https://swagger.io): used to document the RESTful Web Services

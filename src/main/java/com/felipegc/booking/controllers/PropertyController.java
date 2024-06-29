@@ -7,6 +7,9 @@ import com.felipegc.booking.models.PropertyModel;
 import com.felipegc.booking.models.UserModel;
 import com.felipegc.booking.services.PropertyService;
 import com.felipegc.booking.services.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +40,15 @@ public class PropertyController {
     @Autowired
     UserService userService;
 
+    @Operation(summary = "Save a new property.",
+            description = "Save a new property. The response is the property saved containing its detailed information.")
+    @ApiResponses(
+            value = {
+            @ApiResponse(responseCode = "201", description = "The property is created."),
+            @ApiResponse(responseCode = "404", description = "The user by the provided token is not found.")
+    })
     @PostMapping
-    public ResponseEntity<Object> saveProperty(@RequestHeader("Authorization") String token,
+    public ResponseEntity<Object> saveProperty(@RequestHeader("token") String token,
                                                @RequestBody PropertyDto propertyDto) {
         Optional<UserModel> userModel = userService.findByToken(UUID.fromString(token));
         if (userModel.isEmpty()) {
@@ -51,8 +61,16 @@ public class PropertyController {
         return ResponseEntity.status(HttpStatus.CREATED).body(propertyService.save(propertyModel));
     }
 
+    @Operation(summary = "Add a block to a property.",
+            description = "Add a block. The response is the block added to the property.")
+    @ApiResponses(
+            value = {
+            @ApiResponse(responseCode = "200", description = "The block is created."),
+            @ApiResponse(responseCode = "400", description = "The block is not created."),
+            @ApiResponse(responseCode = "404", description = "The property or user by the provided token is not found.")
+    })
     @PostMapping("/{propertyId}/blocks")
-    public ResponseEntity<Object> addBlock(@RequestHeader("Authorization") String token,
+    public ResponseEntity<Object> addBlock(@RequestHeader("token") String token,
                                            @RequestBody @Valid BlockDto blockDto,
                                            @PathVariable(value = "propertyId") UUID propertyId) {
         Optional<UserModel> userModel = userService.findByToken(UUID.fromString(token));
@@ -76,8 +94,15 @@ public class PropertyController {
         }
     }
 
+    @Operation(summary = "Update a block.",
+            description = "Update a block. The response is the block updated.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "The block is updated."),
+            @ApiResponse(responseCode = "400", description = "The block is not updated."),
+            @ApiResponse(responseCode = "404", description = "The property, block or user by the provided token is not found.")
+    })
     @PutMapping("/{propertyId}/blocks/{blockId}")
-    public ResponseEntity<Object> updateBlock(@RequestHeader("Authorization") String token,
+    public ResponseEntity<Object> updateBlock(@RequestHeader("token") String token,
                                               @RequestBody @Valid BlockDto blockDto,
                                               @PathVariable(value = "propertyId") UUID propertyId,
                                               @PathVariable(value = "blockId") UUID blockId) {
@@ -109,8 +134,15 @@ public class PropertyController {
         }
     }
 
+    @Operation(summary = "Delete a block.",
+            description = "Delete a block by its property and id. The response is the status of the operation.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "The block is deleted."),
+            @ApiResponse(responseCode = "400", description = "The block is not deleted."),
+            @ApiResponse(responseCode = "404", description = "The property, block or user by the provided token is not found.")
+    })
     @DeleteMapping("/{propertyId}/blocks/{blockId}")
-    public ResponseEntity<Object> deleteBlock(@RequestHeader("Authorization") String token,
+    public ResponseEntity<Object> deleteBlock(@RequestHeader("token") String token,
                                               @PathVariable(value = "propertyId") UUID propertyId,
                                               @PathVariable(value = "blockId") UUID blockId) {
         Optional<UserModel> userModel = userService.findByToken(UUID.fromString(token));
@@ -138,6 +170,11 @@ public class PropertyController {
         }
     }
 
+    @Operation(summary = "Get all properties.",
+            description = "Get all properties. The response is a list of properties.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "All properties."),
+    })
     @GetMapping
     public ResponseEntity<Object> getAllProperties() {
         return ResponseEntity.status(HttpStatus.OK).body(propertyService.getAllProperties());

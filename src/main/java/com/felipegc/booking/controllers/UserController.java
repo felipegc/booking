@@ -3,6 +3,9 @@ package com.felipegc.booking.controllers;
 import com.felipegc.booking.dtos.UserDto;
 import com.felipegc.booking.models.UserModel;
 import com.felipegc.booking.services.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +25,13 @@ public class UserController {
     @Autowired
     UserService userService;
 
+    @Operation(summary = "Save a new user.",
+            description = "Save a new user. The response is the user saved containing its detailed information.")
+    @ApiResponses(
+            value = {
+            @ApiResponse(responseCode = "201", description = "The user is created."),
+            @ApiResponse(responseCode = "409", description = "The user already exists.")
+    })
     @PostMapping
     public ResponseEntity<Object> saveUser(@RequestBody @Valid UserDto userDto) {
         try {

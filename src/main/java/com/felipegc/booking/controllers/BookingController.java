@@ -10,6 +10,10 @@ import com.felipegc.booking.enums.BookingStatus;
 import com.felipegc.booking.services.BookingService;
 import com.felipegc.booking.services.PropertyService;
 import com.felipegc.booking.services.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +47,13 @@ public class BookingController {
     @Autowired
     UserService userService;
 
+    @Operation(summary = "Save a new booking.",
+            description = "Save a new booking. The response is the booking saved containing its detailed information.")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "201",description = "The booking is created.", content = @Content),
+                    @ApiResponse(responseCode = "404", description = "The property or user is not found", content = @Content),
+            })
     @PostMapping
     public ResponseEntity<Object> saveBooking(@RequestBody @Valid BookingDto bookingDto) {
         Optional<PropertyModel> propertyModel = propertyService.findById(bookingDto.getPropertyId());
@@ -68,6 +79,12 @@ public class BookingController {
         }
     }
 
+    @Operation(summary = "Get a booking by its ID.",
+            description = "Get a booking by its ID. The response is the booking saved containing its detailed information.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "The booking is found.", content = @Content),
+            @ApiResponse(responseCode = "404", description = "The booking is not found.", content = @Content),
+    })
     @GetMapping("/{bookingId}")
     public ResponseEntity<Object> getBooking(@PathVariable(value = "bookingId") UUID bookingId) {
         Optional<BookingModel> bookingModel = bookingService.findById(bookingId);
@@ -78,6 +95,13 @@ public class BookingController {
         return ResponseEntity.status(HttpStatus.OK).body(bookingService.findById(bookingId));
     }
 
+    @Operation(summary = "Update a booking by its ID.",
+            description = "Update a booking by its ID. The response is the booking saved containing its detailed information.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "The booking is updated.", content = @Content),
+            @ApiResponse(responseCode = "400", description = "The booking is not updated.", content = @Content),
+            @ApiResponse(responseCode = "404", description = "The booking is not found.", content = @Content),
+    })
     @PutMapping("/{bookingId}")
     public ResponseEntity<Object> updateBooking(@PathVariable(value = "bookingId") UUID bookingId,
                                                 @RequestBody @Valid UpdateBookingDto updateBookingDto) {
@@ -98,6 +122,13 @@ public class BookingController {
         }
     }
 
+    @Operation(summary = "Change the status of a booking by its ID.",
+            description = "Change the status of a booking by its ID. The response is the booking saved containing its detailed information.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "The booking status is changed.", content = @Content),
+            @ApiResponse(responseCode = "400", description = "The booking status is not changed.", content = @Content),
+            @ApiResponse(responseCode = "404", description = "The booking is not found.", content = @Content),
+    })
     @PatchMapping("/{bookingId}")
     public ResponseEntity<Object> changeBookingStatus(@PathVariable(value = "bookingId") UUID bookingId,
                                                       @RequestBody @Valid UpdateBookingStatusDto updateBookingDto) {
@@ -116,6 +147,13 @@ public class BookingController {
         }
     }
 
+    @Operation(summary = "Delete a booking by its ID.",
+            description = "Delete a booking by its ID. The response is the status of the operation.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "The booking is deleted.", content = @Content),
+            @ApiResponse(responseCode = "400", description = "The booking is not deleted.", content = @Content),
+            @ApiResponse(responseCode = "404", description = "The booking is not found.", content = @Content),
+    })
     @DeleteMapping("/{bookingId}")
     public ResponseEntity<Object> deleteBooking(@PathVariable(value = "bookingId") UUID bookingId) {
         Optional<BookingModel> bookingModelOptional = bookingService.findById(bookingId);
