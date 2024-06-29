@@ -43,7 +43,7 @@ class UserServiceImplTest {
 
     @Test
     void When_Login_WithInvalidEmailOrPassword_ShouldThrowAuthenticationException() {
-        when(userRepository.findUserByEmailAndPassword("test@test.com", "password")).thenReturn(null);
+        when(userRepository.findUserByEmailAndPassword("test@test.com", "password")).thenReturn(Optional.empty());
         AuthenticationException ex = assertThrows(
                 AuthenticationException.class, () -> userServiceImpl.login(
                         "test@test.com", "password"));
@@ -56,7 +56,7 @@ class UserServiceImplTest {
         userModel.setEmail("test@test.com");
         userModel.setPassword("password");
         when(userRepository.findUserByEmailAndPassword(
-                "test@test.com", "password")).thenReturn(userModel);
+                "test@test.com", "password")).thenReturn(Optional.of(userModel));
         UUID token = userServiceImpl.login("test@test.com", "password");
         assertNotNull(token);
     }

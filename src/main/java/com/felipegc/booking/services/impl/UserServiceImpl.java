@@ -32,14 +32,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UUID login(String email, String password) throws AuthenticationException {
-        UserModel userByEmailAndPassword = userRepository.findUserByEmailAndPassword(email, password);
-        if (userByEmailAndPassword == null) {
+        Optional<UserModel> userByEmailAndPassword = userRepository.findUserByEmailAndPassword(email, password);
+        if (userByEmailAndPassword.isEmpty()) {
             throw new AuthenticationException("Invalid email or password.");
         }
 
         UUID token = UUID.randomUUID();
-        userByEmailAndPassword.setToken(token);
-        userRepository.save(userByEmailAndPassword);
+        UserModel userModel = userByEmailAndPassword.get();
+        userModel.setToken(token);
+        userRepository.save(userModel);
         return token;
     }
 

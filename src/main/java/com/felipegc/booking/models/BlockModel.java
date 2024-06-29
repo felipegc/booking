@@ -34,7 +34,6 @@ public class BlockModel implements Serializable {
     @Column(nullable = false, columnDefinition = "DATE")
     private LocalDate endDate;
 
-    // TODO(felipegc): make sure to make this colum not nullable and check other places as well
     @ManyToOne
     @JoinColumn(name = "property_id", referencedColumnName = "propertyId")
     private PropertyModel property;
